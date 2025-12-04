@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 require('dotenv').config();
 const authRoutes = require('./routes/auth.routes');
-
+const { verifyToken } = require('./middlewares/auth.middleware');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -37,4 +37,10 @@ app.listen(port, () => {
   console.log(` Test: http://localhost:${port}/test`);
   console.log(` Register: http://localhost:${port}/api/auth/register`);
   console.log(` Login: http://localhost:${port}/api/auth/login\n`);
+});
+app.get('/api/profile', verifyToken, (req, res) => {
+  res.json({
+    message: 'Profil accessible',
+    user: req.user   // contient id, email, role
+  });
 });
