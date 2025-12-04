@@ -3,29 +3,32 @@ const jwt = require('jsonwebtoken');
 const db = require('../db');
 
 // REGISTER 
-const register = async (req, res) => {
-  const { nom, prenom, email, mot_de_passe, role, photo, institution, domaine_recherche } = req.body;
 
-  if (!nom || !prenom || !email || !mot_de_passe || !role) {
-    return res.status(400).json({ message: 'Veuillez remplir tous les champs obligatoires.' });
+const register = async (req, res) => {
+  let { nom, prenom, email, mot_de_passe, role, photo, institution, domaine_recherche } = req.body;
+
+  // Rôle forcé côté serveur
+  const allowedPublicRoles = ['PARTICIPANT', 'COMMUNICANT'];
+  if (!allowedPublicRoles.includes(role)) {
+    role = 'PARTICIPANT'; // par défaut
   }
 
+  // Si tu utilises express-validator, plus besoin du if (!nom || ...)
+  // Sinon, tu peux le garder.
+
   try {
-    // Vérifier si l'email existe déjà
     db.query('SELECT * FROM utilisateur WHERE email = ?', [email], async (err, result) => {
       if (err) {
         console.error('Erreur DB:', err);
         return res.status(500).json({ message: 'Erreur serveur' });
       }
-      
+
       if (result.length > 0) {
         return res.status(400).json({ message: 'Email déjà utilisé' });
       }
 
-      // hedi dir Hash du mot de passe
       const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
 
-      //hna ndirou l'insertion en DB te3na 
       const sql = `INSERT INTO utilisateur 
         (nom, prenom, email, mot_de_passe, role, photo, institution, domaine_recherche)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
@@ -89,7 +92,7 @@ const login = (req, res) => {
     institution: user.institution,
     domaine_recherche: user.domaine_recherche
   }
-});
+  });
 
   });
 };
