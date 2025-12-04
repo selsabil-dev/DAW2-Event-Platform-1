@@ -77,16 +77,20 @@ const login = (req, res) => {
     );
 
     res.json({ 
-      message: 'Authentification réussie', 
-      token,
-      user: {
-        id: user.id,
-        nom: user.nom,
-        prenom: user.prenom,
-        email: user.email,
-        role: user.role
-      }
-    });
+  message: 'Authentification réussie',
+  token,
+  user: {
+    id: user.id,
+    nom: user.nom,
+    prenom: user.prenom,
+    email: user.email,
+    role: user.role,
+    photo: user.photo,
+    institution: user.institution,
+    domaine_recherche: user.domaine_recherche
+  }
+});
+
   });
 };
 
