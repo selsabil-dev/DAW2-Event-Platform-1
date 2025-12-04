@@ -2,21 +2,18 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../db');
 
-// REGISTER 
-
+// REGISTER
 const register = async (req, res) => {
   let { nom, prenom, email, mot_de_passe, role, photo, institution, domaine_recherche } = req.body;
 
-  // Rôle forcé côté serveur
+  // Rôle forcé côté serveur (sécurité)
   const allowedPublicRoles = ['PARTICIPANT', 'COMMUNICANT'];
   if (!allowedPublicRoles.includes(role)) {
     role = 'PARTICIPANT'; // par défaut
   }
 
-  // Si tu utilises express-validator, plus besoin du if (!nom || ...)
-  // Sinon, tu peux le garder.
-
   try {
+    // Vérifier si l'email existe déjà
     db.query('SELECT * FROM utilisateur WHERE email = ?', [email], async (err, result) => {
       if (err) {
         console.error('Erreur DB:', err);
@@ -27,19 +24,33 @@ const register = async (req, res) => {
         return res.status(400).json({ message: 'Email déjà utilisé' });
       }
 
+      // Hasher le mot de passe
       const hashedPassword = await bcrypt.hash(mot_de_passe, 10);
 
-      const sql = `INSERT INTO utilisateur 
-        (nom, prenom, email, mot_de_passe, role, photo, institution, domaine_recherche)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+      // Insertion en DB
+      const sql = `
+        INSERT INTO utilisateur 
+          (nom, prenom, email, mot_de_passe, role, photo, institution, domaine_recherche)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `;
 
-      db.query(sql, [nom, prenom, email, hashedPassword, role, photo, institution, domaine_recherche], (err, result) => {
-        if (err) {
-          console.error('Erreur insertion:', err);
-          return res.status(500).json({ message: 'Erreur serveur lors de l\'inscription' });
+      db.query(
+        sql,
+        [nom, prenom, email, hashedPassword, role, photo, institution, domaine_recherche],
+        (err, resultInsert) => {
+          if (err) {
+            console.error('Erreur insertion:', err);
+            return res
+              .status(500)
+              .json({ message: "Erreur serveur lors de l'inscription" });
+          }
+
+          res.status(201).json({
+            message: 'Utilisateur créé avec succès',
+            userId: resultInsert.insertId,
+          });
         }
-        res.status(201).json({ message: 'Utilisateur créé avec succès', userId: result.insertId });
-      });
+      );
     });
   } catch (error) {
     console.error('Erreur:', error);
@@ -47,12 +58,14 @@ const register = async (req, res) => {
   }
 };
 
-// hed la partie te3 login 
+// LOGIN
 const login = (req, res) => {
   const { email, mot_de_passe } = req.body;
 
   if (!email || !mot_de_passe) {
-    return res.status(400).json({ message: 'Email et mot de passe requis' });
+    return res
+      .status(400)
+      .json({ message: 'Email et mot de passe requis' });
   }
 
   db.query('SELECT * FROM utilisateur WHERE email = ?', [email], async (err, result) => {
@@ -60,16 +73,20 @@ const login = (req, res) => {
       console.error('Erreur DB:', err);
       return res.status(500).json({ message: 'Erreur serveur' });
     }
-    
+
     if (result.length === 0) {
-      return res.status(400).json({ message: 'Email ou mot de passe incorrect' });
+      return res
+        .status(400)
+        .json({ message: 'Email ou mot de passe incorrect' });
     }
 
     const user = result[0];
 
     const isMatch = await bcrypt.compare(mot_de_passe, user.mot_de_passe);
     if (!isMatch) {
-      return res.status(400).json({ message: 'Email ou mot de passe incorrect' });
+      return res
+        .status(400)
+        .json({ message: 'Email ou mot de passe incorrect' });
     }
 
     // Générer un token JWT
@@ -79,21 +96,20 @@ const login = (req, res) => {
       { expiresIn: '1h' }
     );
 
-    res.json({ 
-  message: 'Authentification réussie',
-  token,
-  user: {
-    id: user.id,
-    nom: user.nom,
-    prenom: user.prenom,
-    email: user.email,
-    role: user.role,
-    photo: user.photo,
-    institution: user.institution,
-    domaine_recherche: user.domaine_recherche
-  }
-  });
-
+    res.json({
+      message: 'Authentification réussie',
+      token,
+      user: {
+        id: user.id,
+        nom: user.nom,
+        prenom: user.prenom,
+        email: user.email,
+        role: user.role,
+        photo: user.photo,
+        institution: user.institution,
+        domaine_recherche: user.domaine_recherche,
+      },
+    });
   });
 };
 
