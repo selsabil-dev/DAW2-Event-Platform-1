@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 require('dotenv').config();
 const authRoutes = require('./routes/auth.routes');
 const { verifyToken } = require('./middlewares/auth.middleware');
+
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -19,15 +20,23 @@ app.use(express.json());
 // Routes Auth
 app.use('/api/auth', authRoutes);
 
+// Route profil protégée
+app.get('/api/profile', verifyToken, (req, res) => {
+  res.json({
+    message: 'Profil accessible',
+    user: req.user   // contient id, email, role
+  });
+});
+
 // Route de test
 app.get('/test', (req, res) => {
   res.json({ message: ' Serveur fonctionne correctement!' });
 });
 
-// Gestionnaire 404
+// Gestionnaire 404 (toujours en dernier)
 app.use((req, res) => {
-  res.status(404).json({ 
-    message: ` Route non trouvée: ${req.method} ${req.originalUrl}` 
+  res.status(404).json({
+    message: ` Route non trouvée: ${req.method} ${req.originalUrl}`
   });
 });
 
@@ -37,10 +46,4 @@ app.listen(port, () => {
   console.log(` Test: http://localhost:${port}/test`);
   console.log(` Register: http://localhost:${port}/api/auth/register`);
   console.log(` Login: http://localhost:${port}/api/auth/login\n`);
-});
-app.get('/api/profile', verifyToken, (req, res) => {
-  res.json({
-    message: 'Profil accessible',
-    user: req.user   // contient id, email, role
-  });
 });
