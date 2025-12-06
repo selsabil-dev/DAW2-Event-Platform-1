@@ -3,44 +3,40 @@ const bodyParser = require('body-parser');
 require('dotenv').config();
 const authRoutes = require('./routes/auth.routes');
 const { verifyToken } = require('./middlewares/auth.middleware');
-
+const eventRoutes = require('./routes/event.routes');
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware pour logger les requêtes
 app.use((req, res, next) => {
   console.log(` ${req.method} ${req.url}`);
   next();
 });
 
-// Middleware pour JSON
 app.use(bodyParser.json());
 app.use(express.json());
 
-// Routes Auth
 app.use('/api/auth', authRoutes);
+app.use('/api/events', eventRoutes);
 
-// Route profil protégée
+// CETTE ROUTE DOIT ÊTRE LÀ, AVANT LE 404
 app.get('/api/profile', verifyToken, (req, res) => {
   res.json({
     message: 'Profil accessible',
-    user: req.user   // contient id, email, role
+    user: req.user
   });
 });
 
-// Route de test
 app.get('/test', (req, res) => {
   res.json({ message: ' Serveur fonctionne correctement!' });
 });
 
-// Gestionnaire 404 (toujours en dernier)
+// 404 en dernier
 app.use((req, res) => {
   res.status(404).json({
     message: ` Route non trouvée: ${req.method} ${req.originalUrl}`
   });
 });
 
-// Démarrer le serveur
 app.listen(port, () => {
   console.log(`\n Serveur Express démarré sur le port ${port}`);
   console.log(` Test: http://localhost:${port}/test`);
