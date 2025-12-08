@@ -1,4 +1,3 @@
-// Définit les routes API pour les événements (ex. : /api/events)
 // routes/event.routes.js
 const express = require('express');
 const router = express.Router();
@@ -9,6 +8,10 @@ const { createEventValidation, validate } = require('../middlewares/event.valida
 
 // Middleware pour vérifier une permission
 const requirePermission = (permission) => (req, res, next) => {
+  console.log('User in requirePermission:', req.user);
+  console.log('Role:', req.user && req.user.role);
+  console.log('Permission needed:', permission);
+
   if (!req.user || !hasPermission(req.user.role, permission)) {
     return res.status(403).json({ message: 'Permission refusée' });
   }
@@ -16,6 +19,13 @@ const requirePermission = (permission) => (req, res, next) => {
 };
 
 // Route pour créer un événement
-router.post('/create', verifyToken, requirePermission('create_event'), createEventValidation, validate, createEventController);
+router.post(
+  '/create',
+  verifyToken,
+  requirePermission('create_event'),
+  createEventValidation,
+  validate,
+  createEventController
+);
 
 module.exports = router;
