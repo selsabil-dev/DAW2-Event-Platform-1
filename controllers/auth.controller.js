@@ -7,7 +7,7 @@ const register = async (req, res) => {
   let { nom, prenom, email, mot_de_passe, role, photo, institution, domaine_recherche } = req.body;
 
   // Rôle forcé côté serveur (sécurité)
-  const allowedPublicRoles = ['PARTICIPANT', 'COMMUNICANT'];
+  const allowedPublicRoles = ['PARTICIPANT', 'COMMUNICANT','ORGANISATEUR'];
   if (!allowedPublicRoles.includes(role)) {
     role = 'PARTICIPANT'; // par défaut
   }
@@ -93,7 +93,7 @@ const login = (req, res) => {
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: '1d' }
     );
 
     res.json({
