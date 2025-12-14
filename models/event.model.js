@@ -16,5 +16,39 @@ const createEvent = (data, callback) => {
     callback(null, result.insertId); // Retourne l'ID de l'événement créé
   });
 };
+const addComiteMember = (comiteId, userId, callback) => {
+  const sql = `
+    INSERT INTO membre_comite (utilisateur_id, comite_id)
+    VALUES (?, ?)
+  `;
 
-module.exports = { createEvent };
+  db.query(sql, [userId, comiteId], (err, result) => {
+    if (err) {
+      console.error('Erreur insertion membre_comite:', err);
+      return callback(err);
+    }
+    callback(null, result.insertId); // id de la ligne membre_comite
+  });
+};
+const addInvite = (eventId, inviteData, callback) => {
+  const { nom, prenom, email, sujet_conference } = inviteData;
+
+  const sql = `
+    INSERT INTO invite (nom, prenom, email, evenement_id, sujet_conference)
+    VALUES (?, ?, ?, ?, ?)
+  `;
+
+  db.query(sql, [nom, prenom, email, eventId, sujet_conference], (err, result) => {
+    if (err) {
+      console.error('Erreur insertion invite:', err);
+      return callback(err);
+    }
+    callback(null, result.insertId); // id de l’invité
+  });
+};
+
+module.exports = {
+  createEvent,
+  addComiteMember,
+  addInvite,
+};

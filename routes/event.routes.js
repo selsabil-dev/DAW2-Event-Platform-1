@@ -1,7 +1,7 @@
 // routes/event.routes.js
 const express = require('express');
 const router = express.Router();
-const { createEventController } = require('../controllers/event.controller');
+const { createEventController , addComiteController , addInviteController} = require('../controllers/event.controller');
 const { verifyToken } = require('../middlewares/auth.middleware');
 const { hasPermission } = require('../middlewares/permissions');
 const { createEventValidation, validate } = require('../middlewares/event.validators');
@@ -27,5 +27,16 @@ router.post(
   validate,
   createEventController
 );
-
+router.post(
+  '/:eventId/add-comite',
+  verifyToken,
+  requirePermission('create_event'),
+  addComiteController
+);
+router.post(
+  '/:eventId/add-invite',
+  verifyToken,
+  requirePermission('create_event'),
+  addInviteController
+);
 module.exports = router;
