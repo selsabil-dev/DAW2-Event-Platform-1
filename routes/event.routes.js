@@ -7,6 +7,7 @@ const {
   addComiteController,
   addInviteController,
   getEventsController,
+  getEventDetailsController,
 } = require('../controllers/event.controller');
 
 const { verifyToken } = require('../middlewares/auth.middleware');
