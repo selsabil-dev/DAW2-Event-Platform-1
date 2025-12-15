@@ -50,5 +50,8 @@ router.post(
   requirePermission('create_event'),
   addInviteController
 );
+// liste publique des evenements
 router.get('/', getEventsController);
+// Détails publics d'un événement
+router.get('/:id', getEventDetailsController);
 module.exports = router;

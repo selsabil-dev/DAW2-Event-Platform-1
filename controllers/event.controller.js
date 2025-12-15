@@ -90,4 +90,21 @@ const getEventsController = (req, res) => {
     res.json({ events });
   });
 };
-module.exports = { createEventController , addComiteController , addInviteController ,getEventsController,};
+const getEventDetailsController = (req, res) => {
+  const { id } = req.params; // /api/events/:id
+
+  getEventDetails(id, (err, details) => {
+    if (err) {
+      return res.status(500).json({ message: "Erreur lors de la récupération de l'événement" });
+    }
+    if (!details) {
+      return res.status(404).json({ message: "Événement non trouvé" });
+    }
+
+    res.json({
+      ...details,
+      inscriptionLink: `/api/inscriptions/register/${id}`, // lien futur
+    });
+  });
+};
+module.exports = { createEventController , addComiteController , addInviteController ,getEventsController,getEventDetailsController,};

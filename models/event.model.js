@@ -67,12 +67,84 @@ const getEvents = (status, callback) => {
     callback(null, results);
   });
 };
+const getEventDetails = (eventId, callback) => {
+  // 1) Récupérer l'événement
+  const sqlEvent = `
+    SELECT id, titre, description, date_debut, date_fin, lieu, thematique, contact
+    FROM evenement
+    WHERE id = ?
+  `;
 
+  db.query(sqlEvent, [eventId], (err, eventResult) => {
+    if (err) {
+      console.error('Erreur récupération événement:', err);
+      return callback(err);
+    }
+    if (eventResult.length === 0) {
+      return callback(null, null); // pas trouvé
+    }
+
+    const event = eventResult[0];
+
+    // 2) Sessions
+    const sqlSessions = `
+      SELECT id, titre, horaire, salle, president_id
+      FROM session
+      WHERE evenement_id = ?
+    `;
+
+    db.query(sqlSessions, [eventId], (err, sessionsResult) => {
+      if (err) {
+        console.error('Erreur récupération sessions:', err);
+        return callback(err);
+      }
+
+      // 3) Invités
+      const sqlInvites = `
+        SELECT id, nom, prenom, email, sujet_conference
+        FROM invite
+        WHERE evenement_id = ?
+      `;
+
+      db.query(sqlInvites, [eventId], (err, invitesResult) => {
+        if (err) {
+          console.error('Erreur récupération invités:', err);
+          return callback(err);
+        }
+
+        // 4) Membres du comité (simple: on ramène les utilisateurs via un JOIN)
+        const sqlComite = `
+          SELECT u.id, u.nom, u.prenom, u.email
+          FROM membre_comite mc
+          JOIN comite_scientifique cs ON mc.comite_id = cs.id
+          JOIN utilisateur u ON mc.utilisateur_id = u.id
+          WHERE cs.evenement_id = ?
+        `;
+
+        db.query(sqlComite, [eventId], (err, comiteResult) => {
+          if (err) {
+            console.error('Erreur récupération comité:', err);
+            return callback(err);
+          }
+
+          const details = {
+            event,
+            sessions: sessionsResult,
+            invites: invitesResult,
+            comite: comiteResult,
+          };
+
+          callback(null, details);
+        });
+      });
+    });
+  });
+};
 
 module.exports = {
   createEvent,
   addComiteMember,
   addInvite,
   getEvents,
-
+  getEventDetails,
 };
