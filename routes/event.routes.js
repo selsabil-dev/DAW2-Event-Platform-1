@@ -6,6 +6,7 @@ const {
   createEventController,
   addComiteController,
   addInviteController,
+  getEventsController,
 } = require('../controllers/event.controller');
 
 const { verifyToken } = require('../middlewares/auth.middleware');
@@ -49,5 +50,5 @@ router.post(
   requirePermission('create_event'),
   addInviteController
 );
-
+router.get('/', getEventsController);
 module.exports = router;

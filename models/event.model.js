@@ -46,9 +46,33 @@ const addInvite = (eventId, inviteData, callback) => {
     callback(null, result.insertId); // id de l’invité
   });
 };
+// Récupérer les événements (option status: 'upcoming' ou 'archived')
+const getEvents = (status, callback) => {
+  let sql = 'SELECT id, titre, description, date_debut, date_fin, lieu, thematique FROM evenement';
+  const params = [];
+
+  if (status === 'upcoming') {
+    sql += ' WHERE date_debut >= CURRENT_DATE()';
+  } else if (status === 'archived') {
+    sql += ' WHERE date_fin < CURRENT_DATE()';
+  }
+
+  sql += ' ORDER BY date_debut ASC';
+
+  db.query(sql, params, (err, results) => {
+    if (err) {
+      console.error('Erreur récupération événements:', err);
+      return callback(err);
+    }
+    callback(null, results);
+  });
+};
+
 
 module.exports = {
   createEvent,
   addComiteMember,
   addInvite,
+  getEvents,
+
 };

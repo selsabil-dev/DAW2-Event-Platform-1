@@ -1,6 +1,6 @@
 //Gère la logique métier pour les événements (création, récupération, mise à jour). Inclut des fonctions comme createEvent, getEvents, getEventDetails, addComite, addInvite
 // controllers/event.controller.js
-const { createEvent, addComiteMember, addInvite } = require('../models/event.model');
+const { createEvent, addComiteMember, addInvite , getEvents} = require('../models/event.model');
 
 const createEventController = async (req, res) => {
   const { titre, description, date_debut, date_fin, lieu, thematique, contact } = req.body;
@@ -80,5 +80,14 @@ const addInviteController = (req, res) => {
   });
 };
 
+const getEventsController = (req, res) => {
+  const { status } = req.query; // ?status=upcoming ou ?status=archived
 
-module.exports = { createEventController , addComiteController , addInviteController};
+  getEvents(status, (err, events) => {
+    if (err) {
+      return res.status(500).json({ message: 'Erreur lors de la récupération des événements' });
+    }
+    res.json({ events });
+  });
+};
+module.exports = { createEventController , addComiteController , addInviteController ,getEventsController,};
