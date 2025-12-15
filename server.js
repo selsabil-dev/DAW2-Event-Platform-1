@@ -2,7 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 require('dotenv').config();
 const authRoutes = require('./routes/auth.routes');
-const eventRoutes = require('./routes/event.routes'); // Ajout
+const eventRoutes = require('./routes/event.routes'); 
+const sessionRoutes = require('./routes/session.routes');
 const { verifyToken } = require('./middlewares/auth.middleware');
 
 const app = express();
@@ -17,7 +18,7 @@ app.use(express.json()); // bodyParser.json() supprimé comme suggéré
 
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes); // Ajout
-
+app.use('/api', sessionRoutes);
 // CETTE ROUTE DOIT ÊTRE LÀ, AVANT LE 404
 app.get('/api/profile', verifyToken, (req, res) => {
   res.json({
