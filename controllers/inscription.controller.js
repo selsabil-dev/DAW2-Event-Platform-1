@@ -1,14 +1,13 @@
+// controllers/inscription.controller.js
 const { validationResult } = require('express-validator');
 const { registerInscription } = require('../models/inscription.model');
 const { inscriptionValidationByProfile } = require('../validators/inscription.validators');
-const inscriptionValidators = require('../validators/inscription.validators');
 
 // Middleware qui applique la validation dynamique
 const validateInscription = (req, res, next) => {
   const profil = req.body.profil;
   const validators = inscriptionValidationByProfile(profil);
 
-  // Exécuter les validators manuellement comme une chaîne de middlewares
   Promise.all(validators.map((v) => v.run(req)))
     .then(() => {
       const errors = validationResult(req);
@@ -26,17 +25,13 @@ const validateInscription = (req, res, next) => {
 // POST /api/inscriptions/register/:eventId
 const register = (req, res) => {
   const { eventId } = req.params;
-  const { profil, nom, prenom, email, titre_communication, statut } = req.body;
+  const { profil } = req.body;
 
-  // L'utilisateur doit être connecté -> req.user.id (via verifyToken)
   const userId = req.user && req.user.id;
   if (!userId) {
     return res.status(401).json({ message: 'Utilisateur non authentifié' });
   }
 
-  // Pour cette phase, on suppose que les infos spécifiques profil
-  // sont déjà stockées dans utilisateur ou gérées ailleurs.
-  // On enregistre seulement l’inscription dans la table inscription.
   registerInscription(eventId, userId, profil, (err, inscriptionId) => {
     if (err) {
       return res.status(500).json({ message: "Erreur lors de l'inscription" });
