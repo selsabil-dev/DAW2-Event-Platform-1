@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 const { registerInscription } = require('../models/inscription.model');
 const { inscriptionValidationByProfile } = require('../validators/inscription.validators');
+const inscriptionValidators = require('../validators/inscription.validators');
 
 // Middleware qui applique la validation dynamique
 const validateInscription = (req, res, next) => {

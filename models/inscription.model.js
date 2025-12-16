@@ -1,24 +1,38 @@
+// models/inscription.model.js
 const db = require('../db');
-const { v4: uuidv4 } = require('uuid'); // servira plus tard pour les badges
+const { v4: uuidv4 } = require('uuid'); // pour les badges
 
 // Enregistrer une inscription de base (quel que soit le profil)
 const registerInscription = (eventId, userId, profil, callback) => {
+  // Générer un badge unique
+  const badge = uuidv4();
+
   const sql = `
-    INSERT INTO inscription (participant_id, evenement_id, statut_paiement, badge, date_inscription)
-    VALUES (?, ?, 'a_payer', NULL, CURRENT_DATE())
+    INSERT INTO inscription (
+      participant_id,
+      evenement_id,
+      statut_paiement,
+      badge,
+      date_inscription
+    )
+    VALUES (?, ?, 'a_payer', ?, CURRENT_DATE())
   `;
-  db.query(sql, [userId, eventId], (err, result) => {
+
+  db.query(sql, [userId, eventId, badge], (err, result) => {
     if (err) {
       console.error('Erreur insertion inscription:', err);
       return callback(err, null);
     }
-    callback(null, result.insertId);
+
+    // On renvoie l'id de l'inscription + le badge généré (pratique côté contrôleur)
+    callback(null, {
+      inscriptionId: result.insertId,
+      badge,
+    });
   });
 };
 
-// Optionnel : si tu veux stocker des infos spécifiques selon profil,
-// tu pourras ajouter ici d'autres fonctions (ex: registerCommunicantDetails, etc.)
-
+// Optionnel : autres fonctions selon le profil plus tard
 module.exports = {
   registerInscription,
 };

@@ -1,17 +1,16 @@
+// routes/inscription.routes.js
 const express = require('express');
 const router = express.Router();
 
-const { register, validateInscription } = require('../controllers/inscription.controller');
-const { verifyToken } = require('../middlewares/auth.middleware');
-const { requirePermission } = require('../middlewares/permission.middleware');
+const inscriptionController = require('../controllers/inscription.controller');
+// si tu as un validateur :
+const { validateInscription } = require('../validators/inscription.validators');
 
-// POST /api/inscriptions/register/:eventId
+// Route pour créer une inscription
 router.post(
-  '/register/:eventId',
-  verifyToken,
-  requirePermission('register_event'),
-  validateInscription,
-  register
+  '/inscription',
+  validateInscription,            // enlève cette ligne si tu n’utilises pas de validator
+  inscriptionController.registerInscription
 );
 
 module.exports = router;
