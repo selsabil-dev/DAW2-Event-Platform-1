@@ -5,7 +5,7 @@ const authRoutes = require('./routes/auth.routes');
 const eventRoutes = require('./routes/event.routes'); 
 const sessionRoutes = require('./routes/session.routes');
 const { verifyToken } = require('./middlewares/auth.middleware');
-
+const inscriptionRoutes = require('./routes/inscription.routes');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -19,6 +19,7 @@ app.use(express.json()); // bodyParser.json() supprimé comme suggéré
 app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes); // Ajout
 app.use('/api', sessionRoutes);
+app.use('/api/inscriptions', inscriptionRoutes);
 // CETTE ROUTE DOIT ÊTRE LÀ, AVANT LE 404
 app.get('/api/profile', verifyToken, (req, res) => {
   res.json({
